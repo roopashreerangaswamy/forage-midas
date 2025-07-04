@@ -1,5 +1,6 @@
 package com.jpmc.midascore;
 
+import com.jpmc.midascore.foundation.Transaction;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,11 +9,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest
+
+@SpringBootTest(properties = {"spring.kafka.consumer.auto-offset-reset=earliest"})
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
-class TaskTwoTests {
-    static final Logger logger = LoggerFactory.getLogger(TaskTwoTests.class);
+@EmbeddedKafka(partitions = 1, topics = { "test-topic" }) // embedded Kafka with 1 partition
+public class TaskTwoTests {
+
+    private static final Logger logger = LoggerFactory.getLogger(TaskTwoTests.class);
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -26,16 +29,11 @@ class TaskTwoTests {
         for (String transactionLine : transactionLines) {
             kafkaProducer.send(transactionLine);
         }
-        Thread.sleep(2000);
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("use your debugger to watch for incoming transactions");
-        logger.info("kill this test once you find the answer");
-        while (true) {
-            Thread.sleep(20000);
-            logger.info("...");
-        }
-    }
 
+        logger.info("==================================================");
+        logger.info("Watch debugger for incoming transactions.");
+        logger.info("==================================================");
+
+        Thread.sleep(10000);  // give time to receive and process messages
+    }
 }

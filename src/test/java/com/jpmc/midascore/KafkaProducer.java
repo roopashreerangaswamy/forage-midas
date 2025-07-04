@@ -16,7 +16,17 @@ public class KafkaProducer {
     }
 
     public void send(String transactionLine) {
-        String[] transactionData = transactionLine.split(", ");
-        kafkaTemplate.send(topic, new Transaction(Long.parseLong(transactionData[0]), Long.parseLong(transactionData[1]), Float.parseFloat(transactionData[2])));
+        String[] transactionData = transactionLine.split(",\\s*"); // split on comma with optional space
+
+        if (transactionData.length != 3) {
+            throw new IllegalArgumentException("Invalid transaction line: " + transactionLine);
+        }
+
+        long fromAccount = Long.parseLong(transactionData[0]);
+        long toAccount = Long.parseLong(transactionData[1]);
+        float amount = Float.parseFloat(transactionData[2]);
+
+        kafkaTemplate.send(topic, new Transaction(fromAccount, toAccount, amount));
     }
+
 }
